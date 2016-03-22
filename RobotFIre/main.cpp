@@ -6,24 +6,30 @@
  */
 
 #include <libplayerc++/playerc++.h>
+#include <iostream>
 
 using namespace PlayerCc;
+using namespace std;
 
 int main() {
-
 	PlayerClient pc("localhost", 6665);
-	LaserProxy lp(&pc);
 	Position2dProxy pp(&pc);
+	SonarProxy sp(&pc);
 
-	pp.SetMotorEnable(true);
+	//pp.SetSpeed(0.5, 0);
+	pp.SetOdometry(-6.009, 2.481, dtor(-194.220));
+
 	while (true) {
 		pc.Read();
+		std::cout << "X: " << pp.GetXPos() << ", Y: " << pp.GetYPos()
+				<< ", Yaw: " << pp.GetYaw();
 
-		if (lp[333] < 0.8)
-			pp.SetSpeed(0.0, 0.3);
+		std::cout << sp << std::endl;
+
+		if (sp[2] < 0.5)
+			pp.SetSpeed(0, 0.5);
 		else
-			pp.SetSpeed(0.8, 0.0);
+			pp.SetSpeed(0.5, 0);
 	}
-	return 0;
 
 }
