@@ -12,6 +12,7 @@
 using namespace PlayerCc;
 using namespace std;
 
+// First Milestone - Robotics Class - Michael lefkovits 204206445 and Alon Bar Tzlil 302276126
 int main() {
 	PlayerClient pc("localhost", 6665);
 	Position2dProxy pp(&pc);
