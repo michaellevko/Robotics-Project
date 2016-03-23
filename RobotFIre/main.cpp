@@ -11,25 +11,69 @@
 using namespace PlayerCc;
 using namespace std;
 
-int main() {
-	PlayerClient pc("localhost", 6665);
-	Position2dProxy pp(&pc);
-	SonarProxy sp(&pc);
+static double avoidDistance = 0.4;
 
-	//pp.SetSpeed(0.5, 0);
-	pp.SetOdometry(-6.009, 2.481, dtor(-194.220));
+void AvoidObstacles(SonarProxy &sp, Position2dProxy &pp)
+{
+	//will avoid obstacles closer than 40cm
+	avoidDistance = 0.4;
+
+	//will turn away at 60 degrees/sec
+	int avoidTurnSpeed = 0.5;
+
+	//left corner is sonar no. 1
+	//right corner is sonar no. 3
+	if((sp[1] < avoidDistance) || (sp[0] < avoidDistance))
+	{
+		pp.SetSpeed(0, avoidTurnSpeed);
+	}
+	else if((sp[3] < avoidDistance) || (sp[4] < avoidDistance))
+	{
+		pp.SetSpeed(0, (-1)*avoidTurnSpeed);
+	}
+	else if(sp[2] < avoidDistance)
+	{
+		pp.SetSpeed(-0.2, avoidTurnSpeed);
+	}
+}
+
+int CheckAllScanners(SonarProxy &sp)
+{
+	bool IsClose = 0;
+	double Distance = 0.4;
+	int ScannerCount = sp.GetCount() -3;
+
+		for (int i=0; i<ScannerCount; i++)
+		{
+			if(sp[i] < Distance)
+			{
+				IsClose = 1;
+				break;
+			}
+		}
+
+	return IsClose;
+}
+
+int main()
+{
+	PlayerClient pc;
+	SonarProxy sp(&pc);
+	Position2dProxy pp(&pc);
 
 	while (true) {
 		pc.Read();
-		std::cout << "X: " << pp.GetXPos() << ", Y: " << pp.GetYPos()
-				<< ", Yaw: " << pp.GetYaw();
 
-		std::cout << sp << std::endl;
+		while(CheckAllScanners(sp))
+		{
+			AvoidObstacles(sp, pp);
+		}
 
-		if (sp[2] < 0.5)
-			pp.SetSpeed(0, 0.5);
-		else
-			pp.SetSpeed(0.5, 0);
+
+		pp.SetSpeed(0.2, 0);
+
 	}
-
+	return 0;
 }
+
+
